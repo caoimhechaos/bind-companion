@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package main;
+
+// DomainConfig describes the configuration of an individual domain.
+message DomainConfig {
+	enum DomainConfigType {
+		MASTER = 0;
+		SLAVE = 1;
+	}
+
+	// Domain name.
+	string name = 1;
+
+	// Type of serving for the domain (master or slave).
+	DomainConfigType type = 2;
+
+	// If the domain is configured as slave, this points to the
+	// master to pull the domain configuration from.
+	string master = 3;
+}
+
+message BindConfig {
+	// Configurations for domains to serve.
+	repeated DomainConfig domain = 1;
+
+	// List of all IPs that are permitted to do an AXFR.
+	repeated string allow_transfer = 2;
+}

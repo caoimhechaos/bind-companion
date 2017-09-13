@@ -1,0 +1,41 @@
+options {
+	directory "/etc/bind";
+	dnssec-validation auto;
+	auth-nxdomain no;
+	listen-on-v6 port 5353 { any; };
+};
+{{- with $bindconfig := . }}
+{{ range $zone := .Domain }}
+
+zone "{{ $zone.Name }}" IN {
+{{- if eq $zone.Type 0 }}
+	type master;
+	file "masterzones/{{ $zone.Name }}.db";
+
+	allow-transfer {
+{{- range $address := $bindconfig.AllowTransfer }}
+		{{ $address }};
+{{- end }}
+	};
+	also-notify {
+{{- range $address := $bindconfig.AllowTransfer }}
+		{{ $address }};
+{{- end }}
+	};
+{{ else }}
+	type slave;
+	file "slavezones/{{ $zone.Name }}.db";
+
+	masters {
+		{{ $zone.Master }};
+	};
+	allow-notify {
+		{{ $zone.Master }};
+{{- range $address := $bindconfig.AllowTransfer }}
+		{{ $address }};
+{{- end }}
+	};
+{{ end }}
+};
+{{ end }}
+{{ end }}
