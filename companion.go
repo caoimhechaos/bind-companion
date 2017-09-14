@@ -18,7 +18,7 @@ import (
 var cmd *exec.Cmd
 var mk_is_running sync.Mutex
 
-func watchForChanges(path string) {
+func watchForChanges(watch_path, make_path string) {
 	var watcher *fsnotify.Watcher
 	var err error
 
@@ -29,9 +29,9 @@ func watchForChanges(path string) {
 	}
 	defer watcher.Close()
 
-	err = watcher.Add(path)
+	err = watcher.Add(watch_path)
 	if err != nil {
-		log.Fatal("Cannot start watching path ", path, ": ", err)
+		log.Fatal("Cannot start watching path ", watch_path, ": ", err)
 	}
 
 	for {
@@ -40,11 +40,11 @@ func watchForChanges(path string) {
 		case event = <-watcher.Events:
 			if event.Op == fsnotify.Create ||
 				event.Op == fsnotify.Write {
-				genFiles(path)
+				genFiles(make_path)
 				updateBind()
 			}
 		case err = <-watcher.Errors:
-			log.Print("Error watching ", path, ": ", err)
+			log.Print("Error watching ", watch_path, ": ", err)
 		}
 	}
 }
@@ -100,6 +100,7 @@ func main() {
 	var bind_config, bind_user, config_path string
 	var bind_template_path string
 	var watch_path string
+	var make_path string
 	var initial_wait time.Duration
 	var startup_deadline time.Time
 	var file *os.File
@@ -108,8 +109,10 @@ func main() {
 	var config BindConfig
 	var err error
 
-	flag.StringVar(&watch_path, "path", "/etc/bind/git/masterzones",
+	flag.StringVar(&watch_path, "path", "/etc/bind/git",
 		"Path to watch for zone file changes")
+	flag.StringVar(&make_path, "make-path", "/etc/bind/git/masterzones",
+		"Path to run make in (usually a symlink below --path)")
 	flag.StringVar(&bind_config, "bind-config", "/etc/bind/named.conf",
 		"Full path of the named configuration file.")
 	flag.StringVar(&bind_user, "bind-user", "named",
@@ -120,7 +123,7 @@ func main() {
 	flag.StringVar(&config_path, "config", "",
 		"Configuration protocol buffer file with domain configs.")
 	flag.DurationVar(&initial_wait, "initial-wait", 5*time.Minute,
-		"Maximum amount of time to wait for the directory in --path to appear")
+		"Maximum time to wait for the directory in --make-path to appear")
 	flag.Parse()
 
 	config_bytes, err = ioutil.ReadFile(config_path)
@@ -158,20 +161,20 @@ func main() {
 	startup_deadline = time.Now().Add(initial_wait)
 	for {
 		var info os.FileInfo
-		info, err = os.Stat(watch_path)
+		info, err = os.Stat(make_path)
 		if err == nil && info.IsDir() {
 			break
 		}
 		if time.Now().After(startup_deadline) {
 			log.Fatal("Exceeded startup timeout waiting for ",
-				watch_path, " to appear")
+				make_path, " to appear")
 		}
-		log.Print(watch_path, " doesn't exist yet, waiting another ",
+		log.Print(make_path, " doesn't exist yet, waiting another ",
 			startup_deadline.Sub(time.Now()))
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	genFiles(watch_path)
-	go watchForChanges(watch_path)
+	genFiles(make_path)
+	go watchForChanges(watch_path, make_path)
 	runBind(bind_config, bind_user)
 }
