@@ -105,7 +105,7 @@ func main() {
 	var config BindConfig
 	var err error
 
-	flag.StringVar(&watch_path, "path", "/etc/bind/masterzones",
+	flag.StringVar(&watch_path, "path", "/etc/bind/git/masterzones",
 		"Path to watch for zone file changes")
 	flag.StringVar(&bind_config, "bind-config", "/etc/bind/named.conf",
 		"Full path of the named configuration file.")
