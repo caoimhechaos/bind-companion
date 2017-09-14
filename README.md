@@ -12,14 +12,14 @@ Volumes
 
 The Bind Companion expects the following volumes to exist:
 
- * **/etc/bind/masterzones** is the directory with the master zone files which bind is serving. Zone files are expected to have the name *domain*.db, e.g. example.org.db
+ * **/etc/bind/git/masterzones** is the directory with the master zone files which bind is serving. Zone files are expected to have the name *domain*.db, e.g. example.org.db
  * **/etc/bind/slavezones** is the cache of slave zone files pulled from other name servers. It does not need to be on permanent storage, but since these files are supposed to help in an outage of the master domain server, it would surely help if they were.
  * **/config** contains the bind configuration protocol buffer, *bind.config*
 
 The Master Zone directory
 -------------------------
 
-Master zones are expected to be stored under **/etc/bind/masterzones**. Each file should have the filename *domainname*.db, e.g. example.org.db.
+Master zones are expected to be stored under **/etc/bind/git/masterzones**. Each file should have the filename *domainname*.db, e.g. example.org.db.
 
 A Makefile is expected to be placed in this directory which will be invoked for generating domain configurations from templates. *make* is invoked inside the master zone directory whenever a change is detected.
 

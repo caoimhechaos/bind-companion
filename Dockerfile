@@ -14,7 +14,7 @@ RUN cd /go/src/github.com/caoimhechaos/bind-companion && go install
 RUN chown named:named /etc/bind
 
 EXPOSE 5353/tcp 5353/udp
-VOLUME ["/etc/bind/masterzones", "/etc/bind/slavezones", "/config"]
+VOLUME ["/etc/bind/git", "/etc/bind/slavezones", "/config"]
 USER named
 
 CMD ["/go/bin/bind-companion", "--config", "/config/bind.config"]

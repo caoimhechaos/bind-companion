@@ -10,7 +10,7 @@ options {
 zone "{{ $zone.Name }}" IN {
 {{- if eq $zone.Type 0 }}
 	type master;
-	file "masterzones/{{ $zone.Name }}.db";
+	file "git/masterzones/{{ $zone.Name }}.db";
 
 	allow-transfer {
 {{- range $address := $bindconfig.AllowTransfer }}
