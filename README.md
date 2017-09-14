@@ -64,3 +64,12 @@ An example configuration could look like this:
 > allow_transfer: "127.0.0.1"
 > allow_transfer: "127.0.0.2"
 > allow_transfer: "127.0.1.1"
+
+TODO
+----
+
+The following tasks are known problems which should be addressed:
+
+ * Add Prometheus monitoring to companion job (with potential statistics
+   extracted from bind process)
+ * Add health check handler.
