@@ -9,6 +9,7 @@ import (
 	"sync"
 	"syscall"
 	"text/template"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 	"gopkg.in/fsnotify.v1"
@@ -99,6 +100,8 @@ func main() {
 	var bind_config, bind_user, config_path string
 	var bind_template_path string
 	var watch_path string
+	var initial_wait time.Duration
+	var startup_deadline time.Time
 	var file *os.File
 	var tmpl *template.Template
 	var config_bytes []byte
@@ -116,6 +119,8 @@ func main() {
 		"Path of the bind configuration template.")
 	flag.StringVar(&config_path, "config", "",
 		"Configuration protocol buffer file with domain configs.")
+	flag.DurationVar(&initial_wait, "initial-wait", 5*time.Minute,
+		"Maximum amount of time to wait for the directory in --path to appear")
 	flag.Parse()
 
 	config_bytes, err = ioutil.ReadFile(config_path)
@@ -148,6 +153,22 @@ func main() {
 	err = file.Close()
 	if err != nil {
 		log.Fatal("Cannot close ", bind_config, " for writing: ", err)
+	}
+
+	startup_deadline = time.Now().Add(initial_wait)
+	for {
+		var info os.FileInfo
+		info, err = os.Lstat(watch_path)
+		if err == nil && info.IsDir() {
+			break
+		}
+		if time.Now().After(startup_deadline) {
+			log.Fatal("Exceeded startup timeout waiting for ",
+				watch_path, " to appear")
+		}
+		log.Print(watch_path, " doesn't exist yet, waiting another ",
+			startup_deadline.Sub(time.Now()))
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	genFiles(watch_path)
