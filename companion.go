@@ -158,7 +158,7 @@ func main() {
 	startup_deadline = time.Now().Add(initial_wait)
 	for {
 		var info os.FileInfo
-		info, err = os.Lstat(watch_path)
+		info, err = os.Stat(watch_path)
 		if err == nil && info.IsDir() {
 			break
 		}
