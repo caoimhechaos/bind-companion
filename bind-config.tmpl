@@ -3,6 +3,11 @@ options {
 	dnssec-validation auto;
 	auth-nxdomain no;
 	listen-on-v6 port 5353 { any; };
+	allow-transfer { none; };
+	allow-recursion { none; };
+	recursion no;
+	additional-from-auth no;
+	additional-from-cache no;
 };
 {{- with $bindconfig := . }}
 {{ range $zone := .Domain }}
