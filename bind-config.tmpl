@@ -27,7 +27,7 @@ zone "{{ $zone.Name }}" IN {
 		{{ $address }};
 {{- end }}
 	};
-{{ else }}
+{{ else if eq $zone.Type 1 }}
 	type slave;
 	file "slavezones/{{ $zone.Name }}.db";
 
@@ -39,6 +39,12 @@ zone "{{ $zone.Name }}" IN {
 {{- range $address := $bindconfig.AllowTransfer }}
 		{{ $address }};
 {{- end }}
+	};
+{{ else }}
+	type forward;
+
+	forwarders {
+		{{ $zone.Master }};
 	};
 {{ end }}
 };

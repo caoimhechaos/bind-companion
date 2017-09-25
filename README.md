@@ -40,8 +40,8 @@ Transfer permissions are just a list of IPs which shall be allowed to request a 
 Domain specific configurations are stored in *domain* subsections. They have the following properties:
 
  * *name* specifies the domain name, without any trailing dots.
- * *type* is either *MASTER* or *SLAVE*, depending on whether the zone is hosted locally or not.
- * *master* is a text specification of the master server to pull domain configurations from if the zone is defined as type *SLAVE*.
+ * *type* is either *MASTER*, *SLAVE*, or *FORWARD* depending on whether the zone is hosted locally or not.
+ * *master* is a text specification of the master server to pull domain configurations from if the zone is defined as type *SLAVE* or *FORWARD*.
 
 An example configuration could look like this:
 
@@ -59,6 +59,12 @@ An example configuration could look like this:
 >    name: "example.net"
 >    type: SLAVE
 >    master: "127.0.0.1"
+> }
+>
+> domain {
+>    name: "kubernetesexample.net"
+>    type: FORWARD
+>    master: "127.0.2.1"
 > }
 >
 > allow_transfer: "127.0.0.1"
